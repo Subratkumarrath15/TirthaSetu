@@ -1,0 +1,2 @@
+# Placeholder to preserve the models directory in version control.
+# Serialized model artifacts (.joblib / .pkl) will be saved here during training.

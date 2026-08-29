@@ -1,0 +1,183 @@
+{
+    "cycle": 199,
+    "timestamp": "2026-08-29 05:36:41",
+    "total_records": 16,
+    "sensors": [
+        {
+            "temple": "Somnath",
+            "zone": "Main Gate",
+            "people_entering": 14,
+            "people_exiting": 11,
+            "current_people": 1237,
+            "crowd_density": 35.34,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Somnath",
+            "zone": "Darshan Queue",
+            "people_entering": 14,
+            "people_exiting": 16,
+            "current_people": 3897,
+            "crowd_density": 38.97,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Somnath",
+            "zone": "Temple Entrance",
+            "people_entering": 13,
+            "people_exiting": 14,
+            "current_people": 1137,
+            "crowd_density": 37.9,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Somnath",
+            "zone": "Parking",
+            "people_entering": 4,
+            "people_exiting": 3,
+            "current_people": 964,
+            "crowd_density": 38.56,
+            "parking_occupancy": 38.56,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Dwarka",
+            "zone": "Main Gate",
+            "people_entering": 17,
+            "people_exiting": 17,
+            "current_people": 1076,
+            "crowd_density": 35.87,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Dwarka",
+            "zone": "Darshan Queue",
+            "people_entering": 7,
+            "people_exiting": 6,
+            "current_people": 3438,
+            "crowd_density": 38.2,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Dwarka",
+            "zone": "Temple Entrance",
+            "people_entering": 9,
+            "people_exiting": 9,
+            "current_people": 969,
+            "crowd_density": 38.76,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Dwarka",
+            "zone": "Parking",
+            "people_entering": 4,
+            "people_exiting": 3,
+            "current_people": 743,
+            "crowd_density": 37.15,
+            "parking_occupancy": 37.15,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Ambaji",
+            "zone": "Main Gate",
+            "people_entering": 14,
+            "people_exiting": 14,
+            "current_people": 1678,
+            "crowd_density": 37.29,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Ambaji",
+            "zone": "Darshan Queue",
+            "people_entering": 18,
+            "people_exiting": 15,
+            "current_people": 5803,
+            "crowd_density": 41.45,
+            "parking_occupancy": null,
+            "risk_level": "MODERATE",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Ambaji",
+            "zone": "Temple Entrance",
+            "people_entering": 13,
+            "people_exiting": 14,
+            "current_people": 1484,
+            "crowd_density": 37.1,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Ambaji",
+            "zone": "Parking",
+            "people_entering": 5,
+            "people_exiting": 6,
+            "current_people": 1182,
+            "crowd_density": 39.4,
+            "parking_occupancy": 39.4,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Pavagadh",
+            "zone": "Main Gate",
+            "people_entering": 8,
+            "people_exiting": 10,
+            "current_people": 578,
+            "crowd_density": 28.9,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Pavagadh",
+            "zone": "Darshan Queue",
+            "people_entering": 11,
+            "people_exiting": 8,
+            "current_people": 2106,
+            "crowd_density": 35.1,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Pavagadh",
+            "zone": "Temple Entrance",
+            "people_entering": 6,
+            "people_exiting": 8,
+            "current_people": 534,
+            "crowd_density": 29.67,
+            "parking_occupancy": null,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        },
+        {
+            "temple": "Pavagadh",
+            "zone": "Parking",
+            "people_entering": 5,
+            "people_exiting": 4,
+            "current_people": 406,
+            "crowd_density": 33.83,
+            "parking_occupancy": 33.83,
+            "risk_level": "LOW",
+            "timestamp": "2026-08-29 05:36:41"
+        }
+    ]
+}

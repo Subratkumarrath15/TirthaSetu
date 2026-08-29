@@ -1,0 +1,28 @@
+{
+    "model_name": "RandomForestRegressor",
+    "training_datetime": "2026-08-29 04:58:56",
+    "n_estimators": 200,
+    "train_rows": 11520,
+    "test_rows": 2880,
+    "features": {
+        "categorical": [
+            "temple",
+            "day_of_week",
+            "weather"
+        ],
+        "numerical": [
+            "hour",
+            "is_weekend",
+            "is_holiday",
+            "is_festival",
+            "temperature",
+            "previous_visitors",
+            "current_crowd"
+        ]
+    },
+    "metrics": {
+        "mae": 97.53,
+        "rmse": 201.2,
+        "r2_score": 0.9808
+    }
+}

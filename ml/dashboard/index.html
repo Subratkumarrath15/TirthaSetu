@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YatraSafe - Government Crowd Safety & Incident Command Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#16a34a',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes subtle-glow {
+      0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.25); }
+      50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.45); }
+    }
+    .critical-glow {
+      animation: subtle-glow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i class="fa-solid fa-om text-white text-xl"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl font-black tracking-tight text-white">YATRASAFE</span>
+            <span class="px-2 py-0.5 text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full uppercase tracking-wide">Government Command Portal</span>
+          </div>
+          <p class="text-xs text-slate-400">AI-Powered Pilgrim Safety, Real-Time Incident Command & Resource Dispatch</p>
+        </div>
+      </div>
+
+      <!-- Controls & Mode Indicator -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <!-- Live vs Demo Mode Indicator -->
+        <div id="systemModeBadge" class="flex items-center space-x-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="systemModeText">LIVE SIMULATOR MODE</span>
+        </div>
+
+        <div class="hidden md:flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300 font-mono">
+          <span class="text-slate-400">Host:</span>
+          <span class="font-bold text-emerald-400">127.0.0.1:8000</span>
+        </div>
+
+        <button id="refreshBtn" onclick="fetchLiveStatus()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition flex items-center space-x-1.5 shadow-md shadow-emerald-600/25 active:scale-95">
+          <i class="fa-solid fa-rotate text-xs" id="refreshIcon"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Hackathon Demo Scenarios Switcher Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 rounded-2xl p-4 shadow-xl">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-sm"></i>
+            <h3 class="text-sm font-extrabold text-white tracking-wide uppercase">Hackathon Presentation Scenarios</h3>
+            <span class="text-[11px] font-semibold text-slate-400">(Deterministic Live Demonstration)</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Execute complete crowd progression across shrines to demonstrate AI forecasting, telemetry, and automated directives:</p>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-1 lg:pt-0">
+          <button id="btn-normal-day" onclick="triggerScenario('normal-day')" class="scenario-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition flex items-center space-x-1.5 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>1. Normal Day (LOW)</span>
+          </button>
+          <button id="btn-busy-weekend" onclick="triggerScenario('busy-weekend')" class="scenario-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 transition flex items-center space-x-1.5 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+            <span>2. Busy Weekend (MODERATE)</span>
+          </button>
+          <button id="btn-festival-rush" onclick="triggerScenario('festival-rush')" class="scenario-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 border border-orange-500/30 transition flex items-center space-x-1.5 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+            <span>3. Festival Rush (HIGH)</span>
+          </button>
+          <button id="btn-emergency-overcrowding" onclick="triggerScenario('emergency-overcrowding')" class="scenario-btn px-3 py-1.5 text-xs font-extrabold rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 transition flex items-center space-x-1.5 shadow-md shadow-red-500/10">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span>4. Emergency Overcrowding (CRITICAL)</span>
+          </button>
+          <button id="btn-live-feed" onclick="resetToLiveFeed()" class="scenario-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-500 transition flex items-center space-x-1.5 ring-2 ring-emerald-400 shadow">
+            <i class="fa-solid fa-satellite-dish text-xs text-sky-400"></i>
+            <span>Live Sensor Feed</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Temple Selector & Telemetry Status Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/70 p-4 rounded-xl border border-slate-800">
+      <div class="flex items-center space-x-3">
+        <label for="templeSelect" class="text-xs font-bold uppercase text-slate-400 tracking-wider">Select Gujarat Shrine:</label>
+        <select id="templeSelect" onchange="onTempleChange()" class="bg-slate-800 border border-slate-700 text-white text-sm font-bold rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="Somnath">Somnath (Nominal Cap: 40,000)</option>
+          <option value="Dwarka">Dwarka (Nominal Cap: 35,000)</option>
+          <option value="Ambaji">Ambaji (Nominal Cap: 50,000)</option>
+          <option value="Pavagadh">Pavagadh (Nominal Cap: 25,000)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center space-x-4 text-xs text-slate-400">
+        <div><i class="fa-regular fa-clock mr-1 text-slate-500"></i> Snapshot: <span id="telemetryTimestamp" class="font-mono text-slate-300">Syncing...</span></div>
+        <div class="flex items-center space-x-1.5">
+          <input type="checkbox" id="autoPollCheck" checked class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0">
+          <label for="autoPollCheck" class="text-slate-300 font-medium">Auto-refresh (3s)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Key Metrics Cards Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Card 1: Master Crowd Score & Risk Tier -->
+      <div id="riskCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden transition-all duration-500">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Unified Safety Score</span>
+          <span id="trendBadge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center space-x-1">
+            <i class="fa-solid fa-arrows-left-right text-xs"></i>
+            <span>STABLE</span>
+          </span>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <div>
+            <div class="text-4xl font-black text-white tracking-tight" id="crowdScoreVal">--%</div>
+            <p class="text-xs text-slate-400 mt-1">40% AI Prediction + 60% Live IoT Telemetry</p>
+          </div>
+          <div id="riskLevelBadge" class="px-3.5 py-1.5 rounded-xl text-sm font-black tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            LOW
+          </div>
+        </div>
+        <div class="mt-4 w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+          <div id="crowdScoreBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Card 2: AI ML Inflow Prediction -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">AI Inflow Forecast (1-Hr)</span>
+          <i class="fa-solid fa-brain text-emerald-400 text-sm"></i>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <div>
+            <div class="text-3xl font-extrabold text-white" id="aiPredictedVisitors">--</div>
+            <p class="text-xs text-slate-400 mt-1">Predicted Arrivals / Next Hour</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-semibold text-slate-400">Hourly Capacity:</span>
+            <div class="text-sm font-bold text-slate-200" id="aiCapacityPercentage">--%</div>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+          <span>RandomForest R²: <strong class="text-emerald-400 font-mono">0.9774</strong></span>
+          <span id="aiRiskTier" class="font-semibold text-slate-300">Model Risk: LOW</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Live Complex Telemetry -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Live Complex Census</span>
+          <i class="fa-solid fa-users text-sky-400 text-sm"></i>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <div>
+            <div class="text-3xl font-extrabold text-white" id="totalCurrentPeople">--</div>
+            <p class="text-xs text-slate-400 mt-1">Active Pilgrims in Complex</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-semibold text-slate-400">Avg Zone Density:</span>
+            <div class="text-sm font-bold text-sky-300" id="avgLiveDensity">--%</div>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+          <span>Peak Zone: <strong class="text-slate-200" id="highestRiskZone">--</strong></span>
+          <span>Parking: <strong class="text-slate-200" id="parkingOccupancyVal">--%</strong></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTIVE INCIDENT COMMAND CENTER -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center border border-red-500/20">
+            <i class="fa-solid fa-tower-broadcast text-sm animate-pulse"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Active Incident Command Center</h3>
+            <p class="text-xs text-slate-400">Real-time alert tracking, incident acknowledgment, and operator resolution dispatch</p>
+          </div>
+        </div>
+        <div id="activeIncidentsBadge" class="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+          0 Active Incidents
+        </div>
+      </div>
+
+      <!-- Incidents List Container -->
+      <div id="incidentsList" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- ANALYTICS & DECISION INSIGHTS SECTION -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+            <i class="fa-solid fa-chart-line text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Analytics & Decision Insights</h3>
+            <p class="text-xs text-slate-400">Longitudinal crowd trends, risk distributions, and multi-shrine comparative intelligence</p>
+          </div>
+        </div>
+        <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          Continuous Decision Intelligence
+        </span>
+      </div>
+
+      <!-- Executive KPI Cards Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Average Crowd Score</span>
+          <div class="text-2xl font-black text-white mt-1" id="kpiAvgScore">--%</div>
+          <span class="text-[11px] text-slate-500">Across rolling history</span>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Highest-Risk Shrine</span>
+          <div class="text-2xl font-black text-white mt-1" id="kpiHighestTemple">--</div>
+          <span class="text-[11px] text-red-400 font-semibold" id="kpiHighestRiskLevel">Tier: --</span>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active Incidents</span>
+          <div class="text-2xl font-black text-amber-400 mt-1" id="kpiActiveInc">--</div>
+          <span class="text-[11px] text-slate-500" id="kpiCriticalInc">-- Critical</span>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Critical Bottleneck</span>
+          <div class="text-2xl font-black text-purple-400 mt-1" id="kpiMostAffectedZone">--</div>
+          <span class="text-[11px] text-slate-500">Most frequent surge zone</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Operational Insight Banner -->
+      <div class="bg-gradient-to-r from-emerald-500/10 via-sky-500/10 to-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-start space-x-3">
+        <i class="fa-solid fa-lightbulb text-amber-400 text-lg mt-0.5"></i>
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-300">Executive Operational Recommendation:</span>
+          <p class="text-xs text-slate-200 mt-0.5 font-medium" id="kpiInsightText">Loading operational decision insights...</p>
+        </div>
+      </div>
+
+      <!-- Charts Row (Trends Line Chart + Risk Distribution Doughnut) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Line Chart: Trends -->
+        <div class="lg:col-span-2 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Crowd Score Trajectory (Recent Snapshots)</span>
+            <span class="text-[11px] text-slate-500 font-mono">Real-time time series</span>
+          </div>
+          <div class="h-56 relative">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Doughnut Chart: Risk Distribution -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Safety Risk Breakdown</span>
+            <span class="text-[11px] text-slate-500">Telemetry Tiers</span>
+          </div>
+          <div class="h-56 relative flex items-center justify-center">
+            <canvas id="riskDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-Temple Comparative Matrix -->
+      <div class="space-y-3">
+        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider block">Cross-Shrine Capacity & Risk Comparison</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="templeComparisonGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Operational Resource Allocation Panel -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+            <i class="fa-solid fa-shield-halved text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Smart Resource Allocation & Directives</h3>
+            <p class="text-xs text-slate-400">Automated operational response plan calculated by Resource Recommendation Engine</p>
+          </div>
+        </div>
+        <div id="emergencyPriorityBadge" class="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+          Priority: LOW
+        </div>
+      </div>
+
+      <!-- Resource Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg border border-blue-500/20">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-white" id="resSecurity">--</div>
+            <div class="text-xs text-slate-400">Security Units</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg border border-rose-500/20">
+            <i class="fa-solid fa-kit-medical"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-white" id="resMedical">--</div>
+            <div class="text-xs text-slate-400">Medical Units</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg border border-amber-500/20">
+            <i class="fa-solid fa-door-open"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-white" id="resGates">--</div>
+            <div class="text-xs text-slate-400">Additional Gates</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-lg border border-purple-500/20">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white mt-1" id="resEmergencyAlert">Standby: Normal</div>
+            <div class="text-xs text-slate-400">Emergency Teams</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Directives -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Queue Management Protocol</span>
+          <p class="text-sm text-slate-200 font-medium" id="queueActionText">Loading...</p>
+        </div>
+        <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Traffic & Parking Directive</span>
+          <p class="text-sm text-slate-200 font-medium" id="parkingActionText">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Audit Reasoning List -->
+      <div class="bg-slate-950/40 p-4 rounded-xl border border-slate-800/60">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Automated Allocation Reasoning</span>
+        <ul id="reasoningList" class="space-y-1 text-xs text-slate-300"></ul>
+      </div>
+    </div>
+
+    <!-- 4-Zone Telemetry Grid -->
+    <div class="space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center space-x-3">
+          <h3 id="zonesSectionTitle" class="text-sm font-bold uppercase tracking-wider text-slate-300">Live Multi-Zone Sensor Feeds</h3>
+          <span id="zonesFeedModeBadge" class="px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            LIVE SIMULATOR DATA
+          </span>
+        </div>
+        <span id="zonesUpdateSubtext" class="text-xs text-slate-400">Updated every 3 seconds via IoT Simulator</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="zonesGrid">
+        <!-- Zone cards rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Script Logic -->
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    let activeScenario = null;
+    let pollInterval = null;
+    let trendChartInstance = null;
+    let riskChartInstance = null;
+
+    async function fetchLiveStatus() {
+      const temple = document.getElementById("templeSelect").value;
+      const refreshIcon = document.getElementById("refreshIcon");
+      refreshIcon.classList.add("fa-spin");
+
+      try {
+        let url;
+        if (activeScenario) {
+          url = `${API_BASE}/api/demo/${activeScenario}`;
+        } else {
+          const params = new URLSearchParams({
+            hour: "10",
+            day_of_week: "Thursday",
+            is_weekend: "0",
+            is_holiday: "0",
+            is_festival: "0",
+            weather: "Sunny",
+            temperature: "30",
+            previous_visitors: "4500"
+          });
+          url = `${API_BASE}/api/full-status/${encodeURIComponent(temple)}?${params.toString()}`;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        const data = await res.json();
+        renderDashboard(data);
+        fetchIncidents();
+        fetchAnalytics();
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setTimeout(() => refreshIcon.classList.remove("fa-spin"), 500);
+      }
+    }
+
+    async function fetchIncidents() {
+      try {
+        const res = await fetch(`${API_BASE}/api/incidents/active`);
+        if (!res.ok) return;
+        const data = await res.json();
+        renderIncidents(data.incidents || []);
+      } catch (err) {
+        console.error("Error fetching incidents:", err);
+      }
+    }
+
+    function renderIncidents(incidents) {
+      const listElem = document.getElementById("incidentsList");
+      const badgeElem = document.getElementById("activeIncidentsBadge");
+
+      const count = incidents.length;
+      badgeElem.innerText = `${count} Active Incident${count === 1 ? '' : 's'}`;
+
+      if (count === 0) {
+        badgeElem.className = "self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+        listElem.innerHTML = `
+          <div class="bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 flex items-center space-x-3 text-emerald-300 text-xs">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+            <span>All temple zones operating within normal safety thresholds. No active incident alerts.</span>
+          </div>
+        `;
+        return;
+      }
+
+      const hasCritical = incidents.some(i => i.risk_level === 'CRITICAL');
+      badgeElem.className = `self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+        hasCritical
+          ? 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse'
+          : 'bg-orange-500/20 text-orange-400 border-orange-500/40'
+      }`;
+
+      listElem.innerHTML = incidents.map(inc => {
+        const isCritical = inc.risk_level === 'CRITICAL';
+        const isAck = inc.status === 'ACKNOWLEDGED';
+
+        const borderStyle = isCritical ? 'border-red-500/50 bg-red-500/10' : 'border-orange-500/50 bg-orange-500/10';
+        const textStyle = isCritical ? 'text-red-300' : 'text-orange-300';
+        const badgeStyle = isCritical ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-orange-500/20 text-orange-400 border-orange-500/40';
+
+        return `
+          <div class="border ${borderStyle} rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition shadow-md">
+            <div class="space-y-1.5 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase border ${badgeStyle}">${inc.risk_level}</span>
+                <span class="text-xs font-mono font-bold text-slate-400">${inc.incident_id}</span>
+                <span class="text-xs font-bold text-white">• ${inc.temple} — <strong class="${textStyle}">${inc.zone}</strong></span>
+                <span class="text-xs font-extrabold ${textStyle}">(${inc.density.toFixed(1)}% Saturation)</span>
+                ${isAck ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">ACKNOWLEDGED</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">DISPATCH REQUIRED</span>'}
+              </div>
+              <p class="text-xs text-slate-200 font-medium">${inc.message}</p>
+              <div class="flex items-center space-x-4 text-[11px] text-slate-400 pt-0.5">
+                <span><i class="fa-regular fa-clock mr-1"></i>Reported: ${inc.created_at}</span>
+                ${inc.acknowledged_at ? `<span><i class="fa-solid fa-user-check mr-1 text-blue-400"></i>Acknowledged: ${inc.acknowledged_at}</span>` : ''}
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2 self-end md:self-center">
+              ${!isAck ? `
+                <button onclick="acknowledgeIncident('${inc.incident_id}')" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition flex items-center space-x-1 shadow-sm">
+                  <i class="fa-solid fa-check text-xs"></i>
+                  <span>Acknowledge</span>
+                </button>
+              ` : `
+                <button disabled class="px-3 py-1.5 rounded-lg bg-blue-900/40 text-blue-300/60 text-xs font-bold border border-blue-800/60 flex items-center space-x-1 cursor-not-allowed">
+                  <i class="fa-solid fa-check-double text-xs"></i>
+                  <span>Acknowledged</span>
+                </button>
+              `}
+              <button onclick="resolveIncident('${inc.incident_id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition flex items-center space-x-1 shadow-sm">
+                <i class="fa-solid fa-shield-halved text-xs"></i>
+                <span>Resolve</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function acknowledgeIncident(incId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/incidents/${encodeURIComponent(incId)}/acknowledge`, { method: "POST" });
+        if (res.ok) fetchIncidents();
+      } catch (err) {
+        console.error("Acknowledge error:", err);
+      }
+    }
+
+    async function resolveIncident(incId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/incidents/${encodeURIComponent(incId)}/resolve`, { method: "POST" });
+        if (res.ok) fetchIncidents();
+      } catch (err) {
+        console.error("Resolve error:", err);
+      }
+    }
+
+    async function fetchAnalytics() {
+      try {
+        const [sumRes, trendRes, distRes, compRes] = await Promise.all([
+          fetch(`${API_BASE}/api/analytics/summary`),
+          fetch(`${API_BASE}/api/analytics/trends?limit=15`),
+          fetch(`${API_BASE}/api/analytics/risk-distribution`),
+          fetch(`${API_BASE}/api/analytics/temple-comparison`)
+        ]);
+
+        if (sumRes.ok) {
+          const sum = await sumRes.json();
+          document.getElementById("kpiAvgScore").innerText = `${sum.average_crowd_score}%`;
+          document.getElementById("kpiHighestTemple").innerText = sum.highest_risk_temple;
+          document.getElementById("kpiHighestRiskLevel").innerText = `Tier: ${sum.highest_risk_level}`;
+          document.getElementById("kpiActiveInc").innerText = `${sum.incident_summary.active} Active`;
+          document.getElementById("kpiCriticalInc").innerText = `${sum.incident_summary.critical} Critical`;
+          document.getElementById("kpiMostAffectedZone").innerText = sum.most_affected_zone;
+          document.getElementById("kpiInsightText").innerText = sum.operational_insight;
+        }
+
+        if (trendRes.ok) {
+          const trendData = await trendRes.json();
+          renderTrendChart(trendData.series || []);
+        }
+
+        if (distRes.ok) {
+          const distData = await distRes.json();
+          renderRiskDistChart(distData.counts || {});
+        }
+
+        if (compRes.ok) {
+          const compData = await compRes.json();
+          renderTempleComparison(compData.comparison || []);
+        }
+      } catch (err) {
+        console.error("Error fetching analytics:", err);
+      }
+    }
+
+    function renderTrendChart(series) {
+      const ctx = document.getElementById("trendChart").getContext("2d");
+      const labels = series.map(s => s.temple + " (" + s.timestamp.split(" ")[1] + ")");
+      const scores = series.map(s => s.crowd_score);
+      const densities = series.map(s => s.live_average_density);
+
+      if (trendChartInstance) {
+        trendChartInstance.data.labels = labels;
+        trendChartInstance.data.datasets[0].data = scores;
+        trendChartInstance.data.datasets[1].data = densities;
+        trendChartInstance.update();
+        return;
+      }
+
+      trendChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Crowd Score (%)",
+              data: scores,
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true,
+              pointRadius: 3
+            },
+            {
+              label: "Live Density (%)",
+              data: densities,
+              borderColor: "#38bdf8",
+              backgroundColor: "transparent",
+              borderWidth: 1.5,
+              borderDash: [4, 4],
+              tension: 0.3,
+              pointRadius: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: "#94a3b8", font: { size: 10 } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#64748b", font: { size: 9 }, maxRotation: 45 },
+              grid: { color: "rgba(51, 65, 85, 0.3)" }
+            },
+            y: {
+              min: 0,
+              max: 100,
+              ticks: { color: "#64748b", font: { size: 9 } },
+              grid: { color: "rgba(51, 65, 85, 0.3)" }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRiskDistChart(counts) {
+      const ctx = document.getElementById("riskDistChart").getContext("2d");
+      const dataVals = [counts.LOW || 0, counts.MODERATE || 0, counts.HIGH || 0, counts.CRITICAL || 0];
+
+      if (riskChartInstance) {
+        riskChartInstance.data.datasets[0].data = dataVals;
+        riskChartInstance.update();
+        return;
+      }
+
+      riskChartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["LOW", "MODERATE", "HIGH", "CRITICAL"],
+          datasets: [{
+            data: dataVals,
+            backgroundColor: ["#10b981", "#eab308", "#f97316", "#ef4444"],
+            borderColor: "#0f172a",
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { color: "#94a3b8", font: { size: 10 }, boxWidth: 10 }
+            }
+          },
+          cutout: "68%"
+        }
+      });
+    }
+
+    function renderTempleComparison(comparison) {
+      const grid = document.getElementById("templeComparisonGrid");
+      grid.innerHTML = comparison.map(t => {
+        let badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        let barColor = "bg-emerald-500";
+        if (t.risk_level === 'CRITICAL') {
+          badgeColor = "bg-red-500/20 text-red-400 border-red-500/40";
+          barColor = "bg-red-500";
+        } else if (t.risk_level === 'HIGH') {
+          badgeColor = "bg-orange-500/10 text-orange-400 border-orange-500/30";
+          barColor = "bg-orange-500";
+        } else if (t.risk_level === 'MODERATE') {
+          badgeColor = "bg-yellow-500/10 text-yellow-400 border-yellow-500/30";
+          barColor = "bg-yellow-500";
+        }
+
+        return `
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white">${t.temple}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase border ${badgeColor}">${t.risk_level}</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span class="text-lg font-black text-white">${t.latest_crowd_score.toFixed(1)}%</span>
+              <span class="text-[10px] text-slate-400">${t.trend}</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1 overflow-hidden">
+              <div class="${barColor} h-1 rounded-full" style="width: ${Math.min(100, t.latest_crowd_score)}%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 pt-0.5">
+              <span>Max: ${t.max_zone_density.toFixed(0)}%</span>
+              <span class="${t.active_incidents > 0 ? 'text-red-400 font-bold' : 'text-slate-500'}">${t.active_incidents} alerts</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderDashboard(data) {
+      document.getElementById("telemetryTimestamp").innerText = data.timestamp;
+
+      // Intelligence Data
+      const intel = data.intelligence || {};
+      const ai = intel.ai_prediction || {};
+      const live = intel.live_data || {};
+      const crowd = intel.crowd_intelligence || {};
+      const res = data.resource_recommendations || {};
+      const ops = data.operations || {};
+
+      // 1. Crowd Score & Risk Tier
+      const score = crowd.final_crowd_score !== undefined ? crowd.final_crowd_score : 0;
+      const risk = (crowd.final_risk_level || "LOW").toUpperCase();
+      const trend = (crowd.trend || "STABLE").toUpperCase();
+
+      document.getElementById("crowdScoreVal").innerText = `${score.toFixed(1)}%`;
+      document.getElementById("crowdScoreBar").style.width = `${Math.min(100, Math.max(0, score))}%`;
+
+      // Update Risk Badge & Card Border
+      const riskBadge = document.getElementById("riskLevelBadge");
+      const riskCard = document.getElementById("riskCard");
+      const scoreBar = document.getElementById("crowdScoreBar");
+
+      riskBadge.innerText = risk;
+      riskBadge.className = "px-3.5 py-1.5 rounded-xl text-sm font-black tracking-wider uppercase border ";
+      riskCard.className = "bg-slate-900 border rounded-2xl p-5 shadow-lg relative overflow-hidden transition-all duration-500 ";
+
+      if (risk === "LOW") {
+        riskBadge.className += "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        riskCard.className += "border-slate-800";
+        scoreBar.className = "bg-emerald-500 h-2.5 rounded-full";
+      } else if (risk === "MODERATE") {
+        riskBadge.className += "bg-yellow-500/10 text-yellow-400 border-yellow-500/30";
+        riskCard.className += "border-yellow-500/30 shadow-yellow-500/5";
+        scoreBar.className = "bg-yellow-500 h-2.5 rounded-full";
+      } else if (risk === "HIGH") {
+        riskBadge.className += "bg-orange-500/10 text-orange-400 border-orange-500/30";
+        riskCard.className += "border-orange-500/40 shadow-orange-500/10";
+        scoreBar.className = "bg-orange-500 h-2.5 rounded-full";
+      } else {
+        riskBadge.className += "bg-red-500/20 text-red-400 border-red-500/40";
+        riskCard.className += "border-red-500/60 shadow-red-500/20 critical-glow";
+        scoreBar.className = "bg-red-500 h-2.5 rounded-full";
+      }
+
+      // Trend Badge
+      const trendBadge = document.getElementById("trendBadge");
+      if (trend === "RISING") {
+        trendBadge.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-rose-400"></i><span class="text-rose-400">RISING</span>`;
+        trendBadge.className = "px-2.5 py-0.5 text-xs font-bold rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center space-x-1";
+      } else if (trend === "FALLING") {
+        trendBadge.innerHTML = `<i class="fa-solid fa-arrow-trend-down text-emerald-400"></i><span class="text-emerald-400">FALLING</span>`;
+        trendBadge.className = "px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center space-x-1";
+      } else {
+        trendBadge.innerHTML = `<i class="fa-solid fa-arrows-left-right text-slate-400"></i><span>STABLE</span>`;
+        trendBadge.className = "px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center space-x-1";
+      }
+
+      // 2. AI Forecast
+      document.getElementById("aiPredictedVisitors").innerText = (ai.predicted_visitors || 0).toLocaleString();
+      document.getElementById("aiCapacityPercentage").innerText = `${(ai.crowd_percentage || 0).toFixed(1)}%`;
+      document.getElementById("aiRiskTier").innerText = `Model Risk: ${ai.risk_level || 'LOW'}`;
+
+      // 3. Live Census
+      document.getElementById("totalCurrentPeople").innerText = (live.total_current_people || 0).toLocaleString();
+      document.getElementById("avgLiveDensity").innerText = `${(live.average_density || 0).toFixed(1)}%`;
+      document.getElementById("highestRiskZone").innerText = live.highest_risk_zone || "--";
+      document.getElementById("parkingOccupancyVal").innerText = `${(live.parking_occupancy || 0).toFixed(1)}%`;
+
+      // 4. Resources & Operations
+      document.getElementById("resSecurity").innerText = `${res.security_personnel || 0} Units`;
+      document.getElementById("resMedical").innerText = `${res.medical_personnel || 0} Units`;
+      document.getElementById("resGates").innerText = `+${res.additional_gates || 0}`;
+
+      const emergAlert = res.emergency_team_alert || false;
+      document.getElementById("resEmergencyAlert").innerText = emergAlert ? "Active Standby" : "Routine";
+      document.getElementById("resEmergencyAlert").className = `text-sm font-bold mt-1 ${emergAlert ? 'text-red-400 font-extrabold' : 'text-slate-200'}`;
+
+      const emergPriority = data.emergency_priority || "LOW";
+      const epBadge = document.getElementById("emergencyPriorityBadge");
+      epBadge.innerText = `Priority: ${emergPriority}`;
+      epBadge.className = `self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${
+        emergPriority === 'CRITICAL' ? 'bg-red-500/20 text-red-400 border-red-500/40' :
+        emergPriority === 'HIGH' ? 'bg-orange-500/20 text-orange-400 border-orange-500/40' :
+        emergPriority === 'MODERATE' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' :
+        'bg-slate-800 text-slate-300 border-slate-700'
+      }`;
+
+      document.getElementById("queueActionText").innerText = ops.queue_action || "Normal queue operations";
+      document.getElementById("parkingActionText").innerText = ops.parking_action || "Normal parking operations.";
+
+      // Reasoning
+      const reasoningList = document.getElementById("reasoningList");
+      const reasoning = data.reasoning || [];
+      if (reasoning.length > 0) {
+        reasoningList.innerHTML = reasoning.map(r => `<li class="flex items-start space-x-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i><span>${r}</span></li>`).join("");
+      } else {
+        reasoningList.innerHTML = `<li>Standard baseline operational allocation.</li>`;
+      }
+
+      // 5. Multi-Zone Cards
+      const zones = data.zones || (data.intelligence && data.intelligence.live_data && data.intelligence.live_data.zones) || [];
+      renderZoneCards(zones);
+    }
+
+    function renderZoneCards(zones) {
+      const grid = document.getElementById("zonesGrid");
+      const titleElem = document.getElementById("zonesSectionTitle");
+      const badgeElem = document.getElementById("zonesFeedModeBadge");
+      const subtextElem = document.getElementById("zonesUpdateSubtext");
+
+      // Update Section Header Mode Badge
+      if (activeScenario) {
+        titleElem.innerText = "Scenario Multi-Zone Telemetry";
+        const scTitleMap = {
+          "normal-day": "Normal Day (Somnath)",
+          "busy-weekend": "Busy Weekend (Dwarka)",
+          "festival-rush": "Festival Rush (Ambaji)",
+          "emergency-overcrowding": "Emergency Overcrowding (Pavagadh)"
+        };
+        const titleName = scTitleMap[activeScenario] || activeScenario;
+        badgeElem.innerText = `DEMO SCENARIO DATA — ${titleName}`;
+        badgeElem.className = "px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30";
+        subtextElem.innerText = "Controlled deterministic scenario telemetry";
+      } else {
+        titleElem.innerText = "Live Multi-Zone Sensor Feeds";
+        badgeElem.innerText = "LIVE SIMULATOR DATA";
+        badgeElem.className = "px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+        subtextElem.innerText = "Updated every 3 seconds via IoT Simulator";
+      }
+
+      if (!zones || zones.length === 0) {
+        grid.innerHTML = `<div class="col-span-4 text-center py-6 text-xs text-slate-500">No sensor zones found for this shrine.</div>`;
+        return;
+      }
+
+      grid.innerHTML = zones.map(z => {
+        const density = z.crowd_density !== undefined ? z.crowd_density : 0;
+        const riskLevel = (z.risk_level || (density >= 85 ? 'CRITICAL' : (density >= 70 ? 'HIGH' : (density >= 40 ? 'MODERATE' : 'LOW')))).toUpperCase();
+
+        let badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        let barColor = "bg-emerald-500";
+
+        if (riskLevel === 'CRITICAL' || density >= 85) {
+          badgeColor = "bg-red-500/20 text-red-400 border-red-500/40";
+          barColor = "bg-red-500";
+        } else if (riskLevel === 'HIGH' || density >= 70) {
+          badgeColor = "bg-orange-500/10 text-orange-400 border-orange-500/30";
+          barColor = "bg-orange-500";
+        } else if (riskLevel === 'MODERATE' || density >= 40) {
+          badgeColor = "bg-yellow-500/10 text-yellow-400 border-yellow-500/30";
+          barColor = "bg-yellow-500";
+        }
+
+        const peopleCount = (z.current_people !== undefined ? z.current_people : 0).toLocaleString();
+        const entering = z.people_entering !== undefined ? z.people_entering : 0;
+        const exiting = z.people_exiting !== undefined ? z.people_exiting : 0;
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 shadow-md hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white tracking-wide">${z.zone}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border ${badgeColor}">${riskLevel}</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span class="text-2xl font-black text-white">${density.toFixed(1)}%</span>
+              <span class="text-xs text-slate-400">${peopleCount} people</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div class="${barColor} h-1.5 rounded-full transition-all duration-500" style="width: ${Math.min(100, Math.max(0, density))}%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/60">
+              <span class="text-emerald-400/90 font-medium">In: +${entering}/min</span>
+              <span class="text-slate-400 font-medium">Out: -${exiting}/min</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function updateModeIndicator(isDemo, scenarioName) {
+      const modeBadge = document.getElementById("systemModeBadge");
+      const modeText = document.getElementById("systemModeText");
+      if (isDemo) {
+        modeBadge.className = "flex items-center space-x-2 px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-xs font-bold text-amber-400";
+        modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>HACKATHON DEMO: ${scenarioName.toUpperCase()}</span>`;
+      } else {
+        modeBadge.className = "flex items-center space-x-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400";
+        modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span>LIVE SIMULATOR MODE</span>`;
+      }
+    }
+
+    function triggerScenario(slug) {
+      activeScenario = slug;
+
+      // Update button highlights
+      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("ring-2", "ring-white", "ring-emerald-400"));
+      const activeBtn = document.getElementById(`btn-${slug}`);
+      if (activeBtn) activeBtn.classList.add("ring-2", "ring-white");
+
+      updateModeIndicator(true, slug);
+
+      // Set matching temple in dropdown
+      const map = {
+        "normal-day": "Somnath",
+        "busy-weekend": "Dwarka",
+        "festival-rush": "Ambaji",
+        "emergency-overcrowding": "Pavagadh"
+      };
+      if (map[slug]) {
+        document.getElementById("templeSelect").value = map[slug];
+      }
+
+      fetchLiveStatus();
+    }
+
+    function resetToLiveFeed() {
+      activeScenario = null;
+
+      // Update button highlights
+      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("ring-2", "ring-white", "ring-emerald-400"));
+      const liveBtn = document.getElementById("btn-live-feed");
+      if (liveBtn) liveBtn.classList.add("ring-2", "ring-emerald-400");
+
+      updateModeIndicator(false);
+      fetchLiveStatus();
+    }
+
+    function onTempleChange() {
+      // If user switches temple dropdown manually, return to live feed for that temple
+      activeScenario = null;
+      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("ring-2", "ring-white", "ring-emerald-400"));
+      const liveBtn = document.getElementById("btn-live-feed");
+      if (liveBtn) liveBtn.classList.add("ring-2", "ring-emerald-400");
+
+      updateModeIndicator(false);
+      fetchLiveStatus();
+    }
+
+    // Auto-polling setup (runs every 3 seconds)
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchLiveStatus();
+      pollInterval = setInterval(() => {
+        if (document.getElementById("autoPollCheck").checked) {
+          fetchLiveStatus();
+        }
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
