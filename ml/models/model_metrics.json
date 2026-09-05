@@ -1,7 +1,8 @@
 {
     "model_name": "RandomForestRegressor",
-    "training_datetime": "2026-08-29 04:58:56",
-    "n_estimators": 200,
+    "training_datetime": "2026-09-05 22:05:05",
+    "n_estimators": 100,
+    "n_jobs": 1,
     "train_rows": 11520,
     "test_rows": 2880,
     "features": {
@@ -21,8 +22,8 @@
         ]
     },
     "metrics": {
-        "mae": 97.53,
-        "rmse": 201.2,
-        "r2_score": 0.9808
+        "mae": 98.14,
+        "rmse": 205.02,
+        "r2_score": 0.98
     }
 }
