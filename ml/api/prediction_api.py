@@ -8,6 +8,7 @@ resource recommendations, and Hackathon interactive demo scenarios.
 
 import os
 import sys
+import json
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,14 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 DASHBOARD_HTML_PATH = os.path.join(PROJECT_ROOT, "dashboard", "index.html")
+
+# Live sensor data file
+SENSOR_DATA_PATH = os.path.join(
+    PROJECT_ROOT,
+    "realtime",
+    "latest_sensor_data.json"
+)
+
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
@@ -56,7 +65,13 @@ app = FastAPI(
 # The standalone ML dashboard is served by this app. React uses the Node gateway.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip() for origin in os.getenv("ML_ALLOWED_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000").split(",")],
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv(
+            "ML_ALLOWED_ORIGINS",
+            "http://localhost:5000,http://127.0.0.1:5000"
+        ).split(",")
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,7 +95,66 @@ async def serve_dashboard():
     """Serve the interactive Government Command Dashboard web interface."""
     if os.path.exists(DASHBOARD_HTML_PATH):
         return FileResponse(DASHBOARD_HTML_PATH, media_type="text/html")
-    return HTMLResponse("<h1>TirthaSetu Government Dashboard</h1><p>Dashboard HTML not found.</p>")
+    return HTMLResponse(
+        "<h1>TirthaSetu Government Dashboard</h1>"
+        "<p>Dashboard HTML not found.</p>"
+    )
+
+
+# ============================================================================
+# LIVE IOT SENSOR INGESTION
+# ============================================================================
+
+@app.post(
+    "/api/realtime/ingest",
+    tags=["Real-Time Telemetry"],
+    summary="Receive Live IoT Sensor Data",
+    description=(
+        "Receives the latest sensor snapshot from the TirthaSetu IoT simulator "
+        "and stores it for the real-time crowd intelligence engine."
+    ),
+)
+async def ingest_sensor_data(payload: dict):
+    """
+    Receive live sensor data from the IoT simulator.
+
+    The simulator sends each generated sensor snapshot to this endpoint.
+    FastAPI stores the latest snapshot so that the existing crowd engine
+    can continue using load_live_sensor_data().
+    """
+    try:
+        os.makedirs(
+            os.path.dirname(SENSOR_DATA_PATH),
+            exist_ok=True
+        )
+
+        # Write to a temporary file first to avoid partial reads.
+        temp_file = SENSOR_DATA_PATH + ".tmp"
+
+        with open(temp_file, "w", encoding="utf-8") as file:
+            json.dump(
+                payload,
+                file,
+                indent=2
+            )
+
+        # Replace the previous snapshot atomically.
+        os.replace(
+            temp_file,
+            SENSOR_DATA_PATH
+        )
+
+        return {
+            "success": True,
+            "message": "Live sensor data received successfully.",
+            "timestamp": payload.get("timestamp"),
+        }
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to store live sensor data: {str(exc)}",
+        )
 
 
 @app.get(
@@ -147,16 +221,45 @@ async def get_realtime_sensor_data(temple: str):
         )
 
     # Compute summary metrics
-    non_parking = [z for z in temple_zones if z.get("zone") != "Parking"]
-    parking = next((z for z in temple_zones if z.get("zone") == "Parking"), None)
+    non_parking = [
+        z for z in temple_zones
+        if z.get("zone") != "Parking"
+    ]
 
-    all_densities = [float(z.get("crowd_density", 0.0)) for z in temple_zones]
-    avg_density = round(sum(all_densities) / len(all_densities), 2) if all_densities else 0.0
-    max_density = round(max(all_densities), 2) if all_densities else 0.0
-    total_people = sum(int(z.get("current_people", 0)) for z in non_parking)
+    parking = next(
+        (z for z in temple_zones if z.get("zone") == "Parking"),
+        None
+    )
+
+    all_densities = [
+        float(z.get("crowd_density", 0.0))
+        for z in temple_zones
+    ]
+
+    avg_density = (
+        round(sum(all_densities) / len(all_densities), 2)
+        if all_densities
+        else 0.0
+    )
+
+    max_density = (
+        round(max(all_densities), 2)
+        if all_densities
+        else 0.0
+    )
+
+    total_people = sum(
+        int(z.get("current_people", 0))
+        for z in non_parking
+    )
+
     parking_occ = (
-        round(float(parking.get("parking_occupancy", 0.0)), 2)
-        if parking and parking.get("parking_occupancy") is not None
+        round(
+            float(parking.get("parking_occupancy", 0.0)),
+            2
+        )
+        if parking
+        and parking.get("parking_occupancy") is not None
         else 0.0
     )
 
@@ -217,9 +320,15 @@ async def predict_temple_crowd(
             previous_visitors=previous_visitors,
             current_crowd=current_crowd,
         )
+
         return result
+
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+
     except Exception as exc:
         raise HTTPException(
             status_code=500,
@@ -251,7 +360,7 @@ async def get_temple_crowd_intelligence(
     if temple not in SUPPORTED_TEMPLES:
         raise HTTPException(
             status_code=404,
-            detail=f"Temple '{temple}' is not supported. Supported temples: {SUPPORTED_TEMPLES}",
+            detail=f"Temple '{temple}' is not supported. Supported temples are: {SUPPORTED_TEMPLES}",
         )
 
     if weather not in SUPPORTED_WEATHER:
@@ -272,14 +381,21 @@ async def get_temple_crowd_intelligence(
             temperature=temperature,
             previous_visitors=previous_visitors,
         )
+
         return analysis
+
     except FileNotFoundError as exc:
         raise HTTPException(
             status_code=503,
             detail="Live sensor telemetry stream is not available. Please run sensor_simulator.py.",
         )
+
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+
     except Exception as exc:
         raise HTTPException(
             status_code=500,
@@ -311,7 +427,7 @@ async def get_temple_resource_recommendations(
     if temple not in SUPPORTED_TEMPLES:
         raise HTTPException(
             status_code=404,
-            detail=f"Temple '{temple}' is not supported. Supported temples: {SUPPORTED_TEMPLES}",
+            detail=f"Temple '{temple}' is not supported. Supported temples are: {SUPPORTED_TEMPLES}",
         )
 
     if weather not in SUPPORTED_WEATHER:
@@ -336,14 +452,21 @@ async def get_temple_resource_recommendations(
 
         # Step 2: Convert intelligence diagnostics into operational recommendations
         recommendations = recommend_resources(intelligence_result)
+
         return recommendations
+
     except FileNotFoundError as exc:
         raise HTTPException(
             status_code=503,
             detail="Live sensor telemetry snapshot not found. Please start sensor_simulator.py.",
         )
+
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+
     except Exception as exc:
         raise HTTPException(
             status_code=500,
@@ -375,7 +498,7 @@ async def get_temple_full_status(
     if temple not in SUPPORTED_TEMPLES:
         raise HTTPException(
             status_code=404,
-            detail=f"Temple '{temple}' is not supported. Supported temples: {SUPPORTED_TEMPLES}",
+            detail=f"Temple '{temple}' is not supported. Supported temples are: {SUPPORTED_TEMPLES}",
         )
 
     if weather not in SUPPORTED_WEATHER:
@@ -403,8 +526,12 @@ async def get_temple_full_status(
 
         # Step 3: Synchronize active zone alerts with Incident Command Center
         alerts = intelligence_result.get("alerts", [])
+
         if alerts:
-            incident_manager.sync_from_alerts(alerts, temple)
+            incident_manager.sync_from_alerts(
+                alerts,
+                temple
+            )
 
         # Step 4: Record analytics snapshot
         analytics_manager.record_snapshot(
@@ -422,7 +549,10 @@ async def get_temple_full_status(
         return {
             "temple": intelligence_result["temple"],
             "timestamp": intelligence_result["timestamp"],
-            "zones": intelligence_result.get("zones", intelligence_result["live_data"].get("zones", [])),
+            "zones": intelligence_result.get(
+                "zones",
+                intelligence_result["live_data"].get("zones", [])
+            ),
             "intelligence": {
                 "ai_prediction": intelligence_result["ai_prediction"],
                 "live_data": intelligence_result["live_data"],
@@ -434,13 +564,19 @@ async def get_temple_full_status(
             "emergency_priority": resource_result["emergency_priority"],
             "reasoning": resource_result["reasoning"],
         }
+
     except FileNotFoundError as exc:
         raise HTTPException(
             status_code=503,
             detail="Live sensor telemetry snapshot not found. Please start sensor_simulator.py.",
         )
+
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+
     except Exception as exc:
         raise HTTPException(
             status_code=500,
@@ -470,7 +606,12 @@ async def get_analytics_summary():
     description="Retrieves time-series telemetry snapshots across temples for trend graphing.",
 )
 async def get_analytics_trends(
-    limit: int = Query(30, ge=5, le=100, description="Number of historical snapshot points to return"),
+    limit: int = Query(
+        30,
+        ge=5,
+        le=100,
+        description="Number of historical snapshot points to return"
+    ),
 ):
     """Retrieve chronological trend data for charting."""
     return analytics_manager.get_trends(limit=limit)
@@ -520,10 +661,16 @@ async def get_incident_analytics():
     description="Retrieves all currently active and acknowledged crowd safety incidents across pilgrimage temples.",
 )
 async def get_active_incidents(
-    temple: Optional[str] = Query(None, description="Filter incidents by temple name"),
+    temple: Optional[str] = Query(
+        None,
+        description="Filter incidents by temple name"
+    ),
 ):
     """Retrieve active and acknowledged crowd incidents."""
-    incidents = incident_manager.get_active_incidents(temple=temple)
+    incidents = incident_manager.get_active_incidents(
+        temple=temple
+    )
+
     return {
         "total_active": len(incidents),
         "incidents": incidents,
@@ -537,10 +684,18 @@ async def get_active_incidents(
     description="Retrieves chronological audit log of all safety incidents (active, acknowledged, and resolved).",
 )
 async def get_incident_history(
-    limit: int = Query(50, ge=1, le=200, description="Maximum number of historical records to return"),
+    limit: int = Query(
+        50,
+        ge=1,
+        le=200,
+        description="Maximum number of historical records to return"
+    ),
 ):
     """Retrieve chronological incident audit logs."""
-    history = incident_manager.get_incident_history(limit=limit)
+    history = incident_manager.get_incident_history(
+        limit=limit
+    )
+
     return {
         "total_history": len(history),
         "incidents": history,
@@ -555,12 +710,16 @@ async def get_incident_history(
 )
 async def acknowledge_incident(incident_id: str):
     """Acknowledge a critical crowd safety incident."""
-    inc = incident_manager.acknowledge_incident(incident_id)
+    inc = incident_manager.acknowledge_incident(
+        incident_id
+    )
+
     if not inc:
         raise HTTPException(
             status_code=404,
             detail=f"Incident with ID '{incident_id}' not found.",
         )
+
     return {
         "status": "success",
         "message": f"Incident {incident_id} successfully acknowledged.",
@@ -576,18 +735,26 @@ async def acknowledge_incident(incident_id: str):
 )
 async def resolve_incident(incident_id: str):
     """Resolve an incident and mark relief completed."""
-    inc = incident_manager.resolve_incident(incident_id)
+    inc = incident_manager.resolve_incident(
+        incident_id
+    )
+
     if not inc:
         raise HTTPException(
             status_code=404,
             detail=f"Incident with ID '{incident_id}' not found.",
         )
+
     return {
         "status": "success",
         "message": f"Incident {incident_id} successfully resolved.",
         "incident": inc,
     }
 
+
+# ============================================================================
+# HACKATHON DEMO SYSTEM
+# ============================================================================
 
 @app.get(
     "/api/demo/scenarios",
@@ -606,6 +773,7 @@ async def list_demo_scenarios():
         }
         for cfg in DEMO_SCENARIOS.values()
     ]
+
     return {
         "total_scenarios": len(scenarios_list),
         "scenarios": scenarios_list,
@@ -623,7 +791,13 @@ async def list_demo_scenarios():
 )
 async def run_demo(scenario_name: str):
     """Execute a specified demo scenario and return full diagnostic report."""
-    normalized_name = scenario_name.strip().lower().replace("_", "-")
+    normalized_name = (
+        scenario_name
+        .strip()
+        .lower()
+        .replace("_", "-")
+    )
+
     if normalized_name not in DEMO_SCENARIOS:
         raise HTTPException(
             status_code=404,
@@ -634,11 +808,24 @@ async def run_demo(scenario_name: str):
         )
 
     try:
-        result = run_demo_scenario(normalized_name)
+        result = run_demo_scenario(
+            normalized_name
+        )
+
         # Sync demo alerts into Incident Command Center
-        demo_alerts = result.get("intelligence", {}).get("alerts", [])
+        demo_alerts = result.get(
+            "intelligence",
+            {}
+        ).get(
+            "alerts",
+            []
+        )
+
         if demo_alerts:
-            incident_manager.sync_from_alerts(demo_alerts, result["temple"])
+            incident_manager.sync_from_alerts(
+                demo_alerts,
+                result["temple"]
+            )
 
         # Record demo snapshot in Analytics Engine
         analytics_manager.record_snapshot(
@@ -651,7 +838,9 @@ async def run_demo(scenario_name: str):
             highest_risk_zone=result["intelligence"]["live_data"]["highest_risk_zone"],
             predicted_visitors=result["intelligence"]["ai_prediction"]["predicted_visitors"],
         )
+
         return result
+
     except Exception as exc:
         raise HTTPException(
             status_code=500,
@@ -661,4 +850,10 @@ async def run_demo(scenario_name: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("prediction_api:app", host="127.0.0.1", port=8000, reload=False)
+
+    uvicorn.run(
+        "prediction_api:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=False
+    )
