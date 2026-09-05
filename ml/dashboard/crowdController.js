@@ -1,5 +1,5 @@
 /**
- * YatraSafe Node.js / Express Crowd Controller & Route Integration
+ * TirthaSetu Node.js / Express Crowd Controller & Route Integration
  *
  * Intermediary proxy and aggregator service connecting the Node.js Express backend
  * to the Python FastAPI AI + Real-Time Microservice (http://127.0.0.1:8000).
@@ -39,7 +39,7 @@ router.get('/temples', async (req, res) => {
     const response = await axios.get(`${AI_MICROSERVICE_URL}/api/temples`);
     return res.status(200).json(response.data);
   } catch (err) {
-    console.error('[YatraSafe AI Error] Failed to fetch temples:', err.message);
+    console.error('[TirthaSetu AI Error] Failed to fetch temples:', err.message);
     return res.status(err.response?.status || 500).json({
       error: 'Failed to fetch temple list',
       details: err.message,
@@ -59,7 +59,7 @@ router.get('/full-status/:temple', async (req, res) => {
     const response = await axios.get(`${AI_MICROSERVICE_URL}/api/full-status/${encodeURIComponent(temple)}`, { params });
     return res.status(200).json(response.data);
   } catch (err) {
-    console.error(`[YatraSafe AI Error] Failed to fetch full status for ${temple}:`, err.message);
+    console.error(`[TirthaSetu AI Error] Failed to fetch full status for ${temple}:`, err.message);
     return res.status(err.response?.status || 500).json({
       error: `Failed to fetch status for ${temple}`,
       details: err.response?.data || err.message,
@@ -78,7 +78,7 @@ router.get('/demo/:scenario', async (req, res) => {
     const response = await axios.get(`${AI_MICROSERVICE_URL}/api/demo/${encodeURIComponent(scenario)}`);
     return res.status(200).json(response.data);
   } catch (err) {
-    console.error(`[YatraSafe AI Error] Demo scenario ${scenario} failed:`, err.message);
+    console.error(`[TirthaSetu AI Error] Demo scenario ${scenario} failed:`, err.message);
     return res.status(err.response?.status || 500).json({
       error: `Failed to execute demo scenario ${scenario}`,
       details: err.response?.data || err.message,

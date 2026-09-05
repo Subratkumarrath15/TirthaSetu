@@ -11,7 +11,9 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173"
+}));
 app.use(express.json());
 
 // Test route
@@ -31,6 +33,9 @@ app.use("/api/prediction", require("./routes/predictionRoutes"));
 app.use("/api/resources",require("./routes/resourceRoutes"));
 app.use("/api/traffic",require("./routes/trafficRoutes"));
 app.use("/api/notifications",require("./routes/notificationRoutes"));
+// Node is the only API surface exposed to the React application. These routes
+// safely proxy the separate FastAPI intelligence service.
+app.use("/api/ai", require("./routes/aiRoutes"));
 
 const PORT = process.env.PORT || 5000;
 

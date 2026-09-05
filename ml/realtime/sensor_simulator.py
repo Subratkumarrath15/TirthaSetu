@@ -1,7 +1,7 @@
 """
 Real-Time IoT Sensor Simulator for YatraSafe AI Module.
 
-Simulates stateful telemetry feeds for 5 pilgrimage temples across 4 distinct zones:
+Simulates stateful telemetry feeds for 4 pilgrimage temples across 4 distinct zones:
 - Main Gate
 - Darshan Queue
 - Temple Entrance

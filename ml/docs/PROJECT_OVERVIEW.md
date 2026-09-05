@@ -1,4 +1,4 @@
-# YatraSafe: AI + Real-Time Pilgrim Safety Intelligence Platform
+# TirthaSetu: AI + Real-Time Pilgrim Safety Intelligence Platform
 ## Executive Project Overview & Architecture Guide (Gujarat Shrines)
 
 ---
@@ -13,10 +13,10 @@ Every year, tens of millions of devotees embark on pilgrimages across Gujarat's 
 ---
 
 ### 💡 B. The Solution
-**YatraSafe** is:
+**TirthaSetu** is:
 > *"An AI-powered real-time crowd intelligence and operational decision support platform for pilgrim safety."*
 
-YatraSafe unifies **Machine Learning arrival forecasting** with **real-time stateful IoT multi-zone sensor telemetry** across Gujarat's pilgrimage shrines to compute unified crowd safety scores, predict surge trajectories, trigger granular zone alarms, and automate government operational directives (security unit counts, medical teams, additional gate activations, queue routing, and vehicle diversions).
+TirthaSetu unifies **Machine Learning arrival forecasting** with **real-time stateful IoT multi-zone sensor telemetry** across Gujarat's pilgrimage shrines to compute unified crowd safety scores, predict surge trajectories, trigger granular zone alarms, and automate government operational directives (security unit counts, medical teams, additional gate activations, queue routing, and vehicle diversions).
 
 ---
 

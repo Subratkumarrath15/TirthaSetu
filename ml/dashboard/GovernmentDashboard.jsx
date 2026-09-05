@@ -1,5 +1,5 @@
 /**
- * YatraSafe Government Command & Control Dashboard (React Component)
+ * TirthaSetu Government Command & Control Dashboard (React Component)
  *
  * Complete unified government portal featuring:
  * - Real-time polling (every 3s)
@@ -154,7 +154,7 @@ export default function GovernmentDashboard() {
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            <span>YatraSafe Gujarat Command Center</span>
+            <span>TirthaSetu Gujarat Command Center</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">Live AI Active</span>
           </h1>
           <p className="text-xs text-slate-400">Pilgrim Safety, Incident Command & Operational Resource Dispatch for Gujarat Shrines</p>

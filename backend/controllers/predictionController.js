@@ -1,46 +1,31 @@
+const { requestML } = require("../services/mlService");
+
 const getPrediction = async (req, res) => {
   try {
     const temple = req.params.temple;
 
-    const response = await fetch(
-      "http://127.0.0.1:8000/predict",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          temple: temple,
-          day_of_week: "Sunday",
-          is_weekend: 1,
-          is_holiday: 0,
-          is_festival: 0,
-          hour: 13,
-          temperature: 32,
-          previous_visitors: 24000
-        })
+    const result = await requestML(`/api/predict/${encodeURIComponent(temple)}`, {
+      query: {
+        hour: req.query.hour ?? 13,
+        day_of_week: req.query.day_of_week ?? "Sunday",
+        is_weekend: req.query.is_weekend ?? 1,
+        is_holiday: req.query.is_holiday ?? 0,
+        is_festival: req.query.is_festival ?? 0,
+        weather: req.query.weather ?? "Clear",
+        temperature: req.query.temperature ?? 32,
+        previous_visitors: req.query.previous_visitors ?? 0,
+        current_crowd: req.query.current_crowd ?? 0
       }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return res.status(500).json({
-        success: false,
-        message: "AI prediction service returned an error",
-        data: result
-      });
-    }
-
-    res.status(200).json(result);
+    });
+    res.status(result.status).json(result.data);
 
   } catch (error) {
     console.error("Prediction service error:", error.message);
 
-    res.status(500).json({
+    res.status(503).json({
       success: false,
       message: "Could not connect to AI prediction service",
-      error: error.message
+      detail: error.message
     });
   }
 };

@@ -1,4 +1,4 @@
-# YatraSafe: Final Hackathon Presentation & Demo Checklist (Gujarat Shrines)
+# TirthaSetu: Final Hackathon Presentation & Demo Checklist (Gujarat Shrines)
 
 ---
 
@@ -48,4 +48,4 @@
 - [ ] **Offline Screenshots**: High-resolution screenshots of all 4 scenarios stored in `docs/screenshots/` or presentation slides.
 - [ ] **Test Report Copy**: Output of `demo/test_end_to_end.py` saved in presentation notes.
 - [ ] **Swagger JSON**: `http://127.0.0.1:8000/openapi.json` cached locally.
-- [ ] **Single-Click Batch Launcher**: Verified `start_yatrasafe.bat` starts the entire stack with one double-click.
+- [ ] **Single-Click Batch Launcher**: Verified `start_tirthasetu.bat` starts the entire stack with one double-click.

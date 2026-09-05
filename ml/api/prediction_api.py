@@ -1,5 +1,5 @@
 """
-FastAPI Microservice for YatraSafe AI + Real-Time Crowd Intelligence & Resource Allocation.
+FastAPI Microservice for TirthaSetu AI + Real-Time Crowd Intelligence & Resource Allocation.
 
 Exposes RESTful endpoints for health checks, temple catalogs, live sensor telemetry,
 AI predictive analytics, unified crowd intelligence diagnostics, automated smart
@@ -41,7 +41,7 @@ from resource_engine.resource_recommender import (
 
 # Initialize FastAPI application with OpenAPI/Swagger metadata
 app = FastAPI(
-    title="YatraSafe AI + Real-Time Prediction & Resource API",
+    title="TirthaSetu AI + Real-Time Prediction & Resource API",
     description=(
         "Production-grade REST microservice providing AI crowd predictions, "
         "live IoT multi-zone sensor feeds, unified Crowd Intelligence analytics, "
@@ -53,11 +53,11 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Configure CORS Middleware for Frontend (React) and Backend (Node.js/Express)
+# The standalone ML dashboard is served by this app. React uses the Node gateway.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permits all origins during development
-    allow_credentials=True,
+    allow_origins=[origin.strip() for origin in os.getenv("ML_ALLOWED_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000").split(",")],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -67,20 +67,20 @@ app.add_middleware(
     "/",
     tags=["Government Dashboard"],
     summary="Government Command Dashboard Portal",
-    description="Serves the interactive YatraSafe Pilgrim Safety & Crowd Command Dashboard UI.",
+    description="Serves the interactive TirthaSetu Pilgrim Safety & Crowd Command Dashboard UI.",
     include_in_schema=False,
 )
 @app.get(
     "/dashboard",
     tags=["Government Dashboard"],
     summary="Government Command Dashboard Portal",
-    description="Serves the interactive YatraSafe Pilgrim Safety & Crowd Command Dashboard UI.",
+    description="Serves the interactive TirthaSetu Pilgrim Safety & Crowd Command Dashboard UI.",
 )
 async def serve_dashboard():
     """Serve the interactive Government Command Dashboard web interface."""
     if os.path.exists(DASHBOARD_HTML_PATH):
         return FileResponse(DASHBOARD_HTML_PATH, media_type="text/html")
-    return HTMLResponse("<h1>YatraSafe Government Dashboard</h1><p>Dashboard HTML not found.</p>")
+    return HTMLResponse("<h1>TirthaSetu Government Dashboard</h1><p>Dashboard HTML not found.</p>")
 
 
 @app.get(
@@ -93,7 +93,7 @@ async def health_check():
     """Service health verification endpoint."""
     return {
         "status": "healthy",
-        "service": "YatraSafe AI + Real-Time Service",
+        "service": "TirthaSetu AI + Real-Time Service",
     }
 
 
@@ -491,7 +491,7 @@ async def get_risk_distribution():
     "/api/analytics/temple-comparison",
     tags=["Analytics & Decision Insights"],
     summary="Compare Multi-Temple Status",
-    description="Comparative analysis across all 5 pilgrimage shrines showing current crowd scores, risk levels, and peak zone saturation.",
+    description="Comparative analysis across all 4 supported pilgrimage sites showing current crowd scores, risk levels, and peak zone saturation.",
 )
 async def get_temple_comparison():
     """Retrieve side-by-side temple comparison dataset."""

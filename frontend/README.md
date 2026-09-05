@@ -1,4 +1,4 @@
-# YatraSafe Frontend
+# TirthaSetu Frontend
 
 React + Vite frontend prototype for the Gujarat pilgrimage crowd-management hackathon.
 
@@ -24,15 +24,9 @@ React + Vite frontend prototype for the Gujarat pilgrimage crowd-management hack
 npm install
 npm run dev
 
-## Backend integration later
-Replace mock values in `src/main.jsx` with API calls from Node/Express. Suggested APIs:
-GET /api/temples
-GET /api/crowd/:temple
-GET /api/prediction/:temple
-GET /api/parking/:temple
-GET /api/sensors/:temple
-POST /api/bookings
-POST /api/emergency
-POST /api/assistance
+## Integration
 
-The UI intentionally works without a backend so the team can demo it immediately.
+The React application calls only the Node gateway at `http://localhost:5000`.
+Node proxies live ML status at `GET /api/ai/full-status/:temple`; bookings and
+emergency requests continue through `POST /api/bookings` and `POST /api/emergency`.
+Set `VITE_API_BASE` only when the gateway is hosted elsewhere.

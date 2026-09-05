@@ -1,17 +1,17 @@
-# YatraSafe AI + Real-Time Intelligence Module (Gujarat Shrines)
+# TirthaSetu AI + Real-Time Intelligence Module (Gujarat Shrines)
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.141+-009688.svg?style=flat&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.9.0-orange.svg?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 [![Status](https://img.shields.io/badge/Status-Hackathon%20Ready-brightgreen.svg)]()
 
-> **Part of the YatraSafe Platform**: An AI-powered crowd safety, real-time IoT sensor telemetry, predictive analytics, and automated resource allocation system for Gujarat pilgrimage shrines and high-density religious gatherings.
+> **Part of the TirthaSetu Platform**: An AI-powered crowd safety, real-time IoT sensor telemetry, predictive analytics, and automated resource allocation system for Gujarat pilgrimage shrines and high-density religious gatherings.
 
 ---
 
 ## 📌 Module Purpose
 
-The **YatraSafe AI + Real-Time Intelligence Module** serves as the analytical brain of the YatraSafe ecosystem. It bridges the gap between historical pilgrim trends and real-time physical conditions across Gujarat's most prominent pilgrimage sites:
+The **TirthaSetu AI + Real-Time Intelligence Module** serves as the analytical brain of the TirthaSetu ecosystem. It bridges the gap between historical pilgrim trends and real-time physical conditions across Gujarat's most prominent pilgrimage sites:
 1. **Forecasting hourly pilgrim inflows and capacity risks** using a trained Random Forest Regressor ($R^2 = 0.9808$, $\text{MAE} = 97.53$).
 2. **Simulating live multi-zone IoT sensor telemetry** (`Main Gate`, `Darshan Queue`, `Temple Entrance`, `Parking`) across 4 Gujarat pilgrimage destinations:
    - **Somnath** (Capacity: 40,000)
@@ -95,7 +95,7 @@ ai-realtime/
 │   ├── PROJECT_OVERVIEW.md          # Comprehensive executive overview
 │   ├── PRESENTATION_SCRIPT.md       # Timed pitches, script, and judge Q&A
 │   └── FINAL_DEMO_CHECKLIST.md      # Pre-demo and during-demo checklist
-└── start_yatrasafe.bat              # One-click Windows application launcher
+└── start_tirthasetu.bat              # One-click Windows application launcher
 ```
 
 ---

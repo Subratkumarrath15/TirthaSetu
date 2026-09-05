@@ -1,10 +1,10 @@
-# YatraSafe: Hackathon Presentation Scripts & Judge Q&A Guide (Gujarat Shrines)
+# TirthaSetu: Hackathon Presentation Scripts & Judge Q&A Guide (Gujarat Shrines)
 
 ---
 
 ## ⏱️ Section A: 30-Second Elevator Pitch
 
-> *"Every year, catastrophic crowd surges at pilgrimage sites claim innocent lives due to delayed, reactive responses. **YatraSafe** transforms pilgrim safety across Gujarat's sacred shrines by fusing Machine Learning arrival forecasts with real-time multi-zone IoT sensor telemetry. Our platform predicts dangerous surges hours in advance, isolates bottleneck zones like the Darshan Queue and hilltop ascent paths, and instantly calculates automated resource allocations—from security deployments and medical dispatch to emergency gate expansions. YatraSafe replaces human guesswork with explainable, real-time decision intelligence to prevent disasters before they happen."*
+> *"Every year, catastrophic crowd surges at pilgrimage sites claim innocent lives due to delayed, reactive responses. **TirthaSetu** transforms pilgrim safety across Gujarat's sacred shrines by fusing Machine Learning arrival forecasts with real-time multi-zone IoT sensor telemetry. Our platform predicts dangerous surges hours in advance, isolates bottleneck zones like the Darshan Queue and hilltop ascent paths, and instantly calculates automated resource allocations—from security deployments and medical dispatch to emergency gate expansions. TirthaSetu replaces human guesswork with explainable, real-time decision intelligence to prevent disasters before they happen."*
 
 ---
 
@@ -13,7 +13,7 @@
 ### ⏱️ `0:00 – 0:15` | Introduction & The Core Problem
 * **Action**: Stand in front of the dashboard with **Live Sensor Feed** running on **Somnath**.
 * **Speaker**:
-  > *"Respected judges, major Gujarat pilgrimage sites like Somnath, Dwarka, Ambaji, and Pavagadh witness massive, unpredictable crowd surges during festivals and weekends that can rapidly turn into stampedes. Traditional crowd management is reactive—authorities only intervene after dangerous choke points form. Today, we present **YatraSafe**, an AI-powered real-time crowd intelligence and operational decision support platform for pilgrim safety."*
+  > *"Respected judges, major Gujarat pilgrimage sites like Somnath, Dwarka, Ambaji, and Pavagadh witness massive, unpredictable crowd surges during festivals and weekends that can rapidly turn into stampedes. Traditional crowd management is reactive—authorities only intervene after dangerous choke points form. Today, we present **TirthaSetu**, an AI-powered real-time crowd intelligence and operational decision support platform for pilgrim safety."*
 
 ---
 
@@ -27,7 +27,7 @@
 ### ⏱️ `0:35 – 0:55` | The AI + IoT Fusion Engine & Busy Weekend
 * **Action**: Click the **`2. Busy Weekend (MODERATE)`** scenario button (Dwarka).
 * **Speaker**:
-  > *"The core innovation of YatraSafe is our **40/60 Intelligence Fusion**: we combine our trained Random Forest ML model ($R^2 = 0.9808$) predicting next-hour visitor arrivals with real-time ground telemetry. On a busy weekend morning at Dwarkadhish temple, the unified score scales to 65.9% (MODERATE), prompting our engine to allocate 4 security units and prepare +1 additional gate."*
+  > *"The core innovation of TirthaSetu is our **40/60 Intelligence Fusion**: we combine our trained Random Forest ML model ($R^2 = 0.9808$) predicting next-hour visitor arrivals with real-time ground telemetry. On a busy weekend morning at Dwarkadhish temple, the unified score scales to 65.9% (MODERATE), prompting our engine to allocate 4 security units and prepare +1 additional gate."*
 
 ---
 
@@ -52,7 +52,7 @@
 ### ⏱️ `1:45 – 2:00` | Analytics & Conclusion
 * **Action**: Point to **Analytics & Decision Insights** charts and cross-shrine comparison matrix.
 * **Speaker**:
-  > *"Finally, our Analytics Engine tracks time-series crowd trajectories, risk distributions, and cross-shrine bottlenecks across all 4 Gujarat temples (Somnath, Dwarka, Ambaji, Pavagadh). YatraSafe provides end-to-end, proactive, and explainable intelligence to protect pilgrims and save lives. Thank you!"*
+  > *"Finally, our Analytics Engine tracks time-series crowd trajectories, risk distributions, and cross-shrine bottlenecks across all 4 Gujarat temples (Somnath, Dwarka, Ambaji, Pavagadh). TirthaSetu provides end-to-end, proactive, and explainable intelligence to protect pilgrims and save lives. Thank you!"*
 
 ---
 
@@ -113,4 +113,4 @@
 > **Answer**: *"Yes. The FastAPI service is stateless and lightweight, containerizable with Docker and orchestrated via Kubernetes. Shrines and zones are modeled modularly in JSON configurations, allowing instant horizontal scaling."*
 
 #### Q10: What is your single biggest innovation?
-> **Answer**: *"Bridging the gap between predictive AI forecasting and real-time operational response. YatraSafe doesn't just show charts—it translates complex telemetry into instant, actionable commands (exact security units, gate numbers, and queue bypass routes) to protect human lives."*
+> **Answer**: *"Bridging the gap between predictive AI forecasting and real-time operational response. TirthaSetu doesn't just show charts—it translates complex telemetry into instant, actionable commands (exact security units, gate numbers, and queue bypass routes) to protect human lives."*
